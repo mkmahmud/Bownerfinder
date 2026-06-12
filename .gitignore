@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+node_modules/
+.next/
+dist/
+build/
+storage/*.db
+storage/uploads/*
+storage/results/*
+storage/exports/*
+backend/tests/.test_storage/
+frontend/.env.local
+
