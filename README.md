@@ -23,12 +23,14 @@ flow, Docker Compose, migrations, and tests.
 
 ```bash
 cd backend
-python -m venv .venv
+if not exist .venv (python -m venv .venv)
 .venv\Scripts\activate
 pip install -r requirements.txt
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
+
+If `.venv` already exists, do not recreate it. If Windows reports a permission error for `.venv\Scripts\python.exe`, create a fresh environment with a different name, for example `python -m venv .venv-local`, then activate `.venv-local\Scripts\activate` instead.
 
 API documentation is available at:
 
@@ -44,6 +46,17 @@ npm run dev
 ```
 
 Open `http://localhost:3000/upload`.
+
+Ollama is optional for local development. If it is not running, the app falls back to deterministic ranking for enrichment and still works.
+
+If you want LLM ranking, install Ollama, start the Ollama server, and pull a model such as `qwen3` or `llama3` before clicking re-enrich.
+
+Example:
+
+```bash
+ollama serve
+ollama pull qwen3
+```
 
 ## Docker
 

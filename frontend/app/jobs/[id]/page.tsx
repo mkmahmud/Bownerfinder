@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { JobActions } from "@/components/job-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { API_BASE_URL, type Company, type Job, listCompanies } from "@/lib/api";
+import { type Company, type Job, listCompanies, request } from "@/lib/api";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -36,20 +37,29 @@ export default async function JobDetailPage({ params }: PageProps) {
         <Metric title="Rejected" value={job.invalid_rows.toString()} />
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <JobActions jobId={job.id} status={job.status} />
+        </CardContent>
+      </Card>
+
       <CompanyTable companies={companies} />
     </div>
   );
 }
 
 async function getJob(id: string): Promise<Job | null> {
-  const response = await fetch(`${API_BASE_URL}/jobs/${id}`, { cache: "no-store" });
-  if (response.status === 404) {
-    return null;
+  try {
+    return await request<Job>(`/jobs/${id}`);
+  } catch (error) {
+    if (error instanceof Error && error.message.toLowerCase().includes("not found")) {
+      return null;
+    }
+    throw error;
   }
-  if (!response.ok) {
-    throw new Error("Unable to load job.");
-  }
-  return (await response.json()) as Job;
 }
 
 function Metric({ title, value }: { title: string; value: string }) {
@@ -69,19 +79,22 @@ function CompanyTable({ companies }: { companies: Company[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Validated companies</CardTitle>
+        <CardTitle>Enriched companies</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left text-sm">
+          <table className="w-full min-w-[1200px] text-left text-sm">
             <thead className="border-b text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="py-3 pr-4">Row</th>
                 <th className="py-3 pr-4">Business</th>
                 <th className="py-3 pr-4">Normalized</th>
                 <th className="py-3 pr-4">Website</th>
+                <th className="py-3 pr-4">Decision maker</th>
+                <th className="py-3 pr-4">Title</th>
                 <th className="py-3 pr-4">Email</th>
                 <th className="py-3 pr-4">Phone</th>
+                <th className="py-3 pr-4">Score</th>
               </tr>
             </thead>
             <tbody>
@@ -91,8 +104,11 @@ function CompanyTable({ companies }: { companies: Company[] }) {
                   <td className="py-3 pr-4 font-medium">{company.business_name}</td>
                   <td className="py-3 pr-4">{company.normalized_business_name}</td>
                   <td className="py-3 pr-4">{company.website ?? ""}</td>
+                  <td className="py-3 pr-4">{company.decision_maker_name ?? ""}</td>
+                  <td className="py-3 pr-4">{company.decision_maker_title ?? ""}</td>
                   <td className="py-3 pr-4">{company.email ?? ""}</td>
                   <td className="py-3 pr-4">{company.phone ?? ""}</td>
+                  <td className="py-3 pr-4">{company.confidence_score ?? 0}</td>
                 </tr>
               ))}
             </tbody>

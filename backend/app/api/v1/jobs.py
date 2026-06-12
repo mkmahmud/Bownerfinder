@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.db.session import get_db
 from app.models.company import Company
 from app.models.job import Job
 from app.schemas.company import CompanyRead
-from app.schemas.job import JobRead
+from app.schemas.job import EnrichmentRequest, JobRead
+from app.services.enrichment import schedule_job_pipeline
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -46,4 +48,16 @@ def list_job_companies(
         .limit(limit)
     )
     return list(db.scalars(statement).all())
+
+
+@router.post("/{job_id}/enrich", response_model=JobRead)
+def enrich_job(job_id: str, payload: EnrichmentRequest, db: Session = Depends(get_db)) -> Job:
+    job = db.get(Job, job_id)
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found.")
+    if payload.mode not in {"full", "rerun"}:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unsupported enrichment mode.")
+    schedule_job_pipeline(job_id, get_settings())
+    db.refresh(job)
+    return job
 

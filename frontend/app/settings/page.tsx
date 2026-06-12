@@ -24,8 +24,16 @@ export default function SettingsPage() {
               <dd className="text-muted-foreground">CSV, XLSX</dd>
             </div>
             <div className="grid gap-1">
+              <dt className="font-medium">Pipeline mode</dt>
+              <dd className="text-muted-foreground">Inline local execution with Redis/RQ fallback</dd>
+            </div>
+            <div className="grid gap-1">
               <dt className="font-medium">Maximum upload size</dt>
               <dd className="text-muted-foreground">25 MB</dd>
+            </div>
+            <div className="grid gap-1">
+              <dt className="font-medium">AI model</dt>
+              <dd className="text-muted-foreground">Ollama qwen3 or llama3</dd>
             </div>
           </dl>
         </CardContent>

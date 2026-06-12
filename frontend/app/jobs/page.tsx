@@ -11,7 +11,7 @@ export default async function JobsPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-normal">Jobs</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Uploaded lead files and validation counts.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Uploaded lead files, enrichment state, and row counts.</p>
       </div>
 
       <Card>
@@ -28,6 +28,7 @@ export default async function JobsPage() {
                   <th className="py-3 pr-4">Rows</th>
                   <th className="py-3 pr-4">Accepted</th>
                   <th className="py-3 pr-4">Rejected</th>
+                  <th className="py-3 pr-4">Updated</th>
                   <th className="py-3 pr-4">Created</th>
                 </tr>
               </thead>
@@ -43,6 +44,7 @@ export default async function JobsPage() {
                     <td className="py-3 pr-4">{job.total_rows}</td>
                     <td className="py-3 pr-4">{job.valid_rows}</td>
                     <td className="py-3 pr-4">{job.invalid_rows}</td>
+                    <td className="py-3 pr-4">{format(new Date(job.updated_at), "yyyy-MM-dd HH:mm")}</td>
                     <td className="py-3 pr-4">{format(new Date(job.created_at), "yyyy-MM-dd HH:mm")}</td>
                   </tr>
                 ))}
